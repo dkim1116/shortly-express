@@ -22,7 +22,7 @@ var Link = require('../app/models/link');
 // rows of asterisks below. If you do, you will be overwriting
 // the actual beforeEach, which we want to work!
 /************************************************************/
-var xbeforeEach = function(){};
+var xbeforeEach = function(){console.log('bullshit')};
 /************************************************************/
 
 
@@ -49,10 +49,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
 
     // delete user Phillip from db so it can be created later for the test
@@ -61,19 +61,20 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
   });
 
-  describe('Link creation:', function(){
+  xdescribe('Link creation:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
-var xbeforeEach = function(){};
+    beforeEach(function(){
       // create a user that we can then log-in with
+      console.log('creating user Phillip');
       new User({
           'username': 'Phillip',
           'password': 'Phillip'
@@ -222,7 +223,7 @@ var xbeforeEach = function(){};
 
   }); // 'Link creation'
 
-  xdescribe('Privileged Access:', function(){
+  describe('Privileged Access:', function(){
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -240,6 +241,7 @@ var xbeforeEach = function(){};
 
     it('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
       request('http://127.0.0.1:4568/links', function(error, res, body) {
+
         expect(res.req.path).to.equal('/login');
         done();
       });
@@ -247,7 +249,7 @@ var xbeforeEach = function(){};
 
   }); // 'Priviledged Access'
 
-  xdescribe('Account Creation:', function(){
+  describe('Account Creation:', function(){
 
     it('Signup creates a user record', function(done) {
       var options = {
@@ -295,7 +297,7 @@ var xbeforeEach = function(){};
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function(){
+  describe('Account Login:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 

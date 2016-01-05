@@ -10,7 +10,7 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
-
+var session = require('express-session');
 var app = express();
 
 app.set('views', __dirname + '/views');
@@ -21,19 +21,45 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({secret: 'keyboard cat'}));
 
 
-app.get('/', 
+function checkUser(req, res, next) {
+  console.log("here is the session",req.session);
+  if (req.session.user) {
+    console.log('access granted');
+    next();
+  } else {
+    console.log('access denied, redircting to login');
+    req.session.error = 'Access denied!';
+    res.redirect('/login');
+  }
+}
+
+app.get('/', checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create', checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/login', function(req, res){
+  res.render('login');
+});
+
+app.get('/logout', function(req, res){
+  req.session.user = undefined;
+  res.redirect('/login');
+})
+
+app.get('/signup', function(req, res){
+  res.render('signup')
+})
+
+app.get('/links', checkUser,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
@@ -72,6 +98,31 @@ function(req, res) {
       });
     }
   });
+});
+
+app.post('/signup',function(req,res){
+  //create user account
+
+  // TODO: see if user already exists
+  new User(req.body).save().then(function(newUser){
+    Users.add(newUser);
+    req.session.user = req.body.username;
+    //res.send(200, newUser);
+    res.redirect('/');
+  });
+});
+
+app.post('/login',function(req,res){
+
+  new User(req.body).fetch().then(function(found){
+    if(found){
+      req.session.user = req.body.username;
+      res.redirect('/'); 
+    }
+    // res.redirect('/'); 
+    res.redirect('/login');
+  });
+
 });
 
 /************************************************************/
